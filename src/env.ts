@@ -1,6 +1,7 @@
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 export const env = {
+  NODE_ENV:                  process.env.NODE_ENV as "production" | "development",
   PROXMOX_TOKEN:             process.env.PROXMOX_TOKEN,
   HA_URL:                    "http://192.168.50.135:8123/health",
   PROXMOX_HOST:              "https://192.168.50.244:8006",

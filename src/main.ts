@@ -8,8 +8,6 @@ async function run() {
 
   while (true) {
 
-    await new Promise(resolve => setTimeout(resolve, env.CHECK_INTERVAL_MS));
-    
     let browser: Browser;
     let context: BrowserContext;
     let page: Page;
@@ -32,7 +30,6 @@ async function run() {
       page    = await context.newPage();
     
       let loops = 0;
-      const BYTES_TO_MB = 1024 * 1024;
     
       while (env.REINIT_BROWSER_LOOPS > loops) {
     
@@ -73,6 +70,9 @@ async function run() {
           }
           
         }
+
+        if(env.NODE_ENV === "development")
+          break;
     
         await new Promise(resolve => setTimeout(resolve, env.CHECK_INTERVAL_MS));
       }
@@ -84,10 +84,14 @@ async function run() {
   
       await cleanup(true);
     }
+
+    if(env.NODE_ENV === "development") {
+      logger.debug(() => "Demo run done")
+      break;
+    }
   }
 
 };
 
-logger.info("Watchdog service started");
-
+logger.info("\n\nWatchdog service started\n\n");
 run();

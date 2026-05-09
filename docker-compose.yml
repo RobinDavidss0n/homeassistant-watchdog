@@ -23,7 +23,7 @@ services:
       - NODE_ENV=development
     develop:
       watch:
-        - action: sync
+        - action: sync+restart
           path: ./src
           target: /app/src
         - action: rebuild
