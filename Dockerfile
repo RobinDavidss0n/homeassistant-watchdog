@@ -1,6 +1,6 @@
 FROM node:24-bookworm AS base
 WORKDIR /app
-COPY package*.json ./
+COPY package*.json tsconfig.json ./
 RUN npm ci && npx playwright install --with-deps chromium
 
 # Target: dev

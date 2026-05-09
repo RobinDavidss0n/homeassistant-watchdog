@@ -28,3 +28,5 @@ services:
           target: /app/src
         - action: rebuild
           path: package.json
+        - action: rebuild
+          path: tsconfig.json
