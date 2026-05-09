@@ -1,0 +1,30 @@
+services:
+  # Production (Default)
+  prod:
+    build:
+      context: .
+      target: production
+    container_name: ha-watchdog
+    restart: always
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+    mem_limit: 1g
+
+  # Development
+  dev:
+    profiles: ["dev"]
+    build:
+      context: .
+      target: development
+    container_name: ha-watchdog-dev
+    env_file: .env
+    environment:
+      - NODE_ENV=development
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: rebuild
+          path: package.json
