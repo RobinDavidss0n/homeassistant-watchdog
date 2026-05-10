@@ -5,7 +5,7 @@ const winstonLogger = createLogger({
   level: env.NODE_ENV === "production" ? "info" : "debug",
   format: format.combine(
     format.colorize(),
-    format.timestamp({ format: "hh:mm:ss:SSS" }),
+    format.timestamp({ format: env.NODE_ENV === "production" ? "YYYY-MM-DD | HH:mm:ss:SSS" : "HH:mm:ss:SSS" }),
     format.printf(({ level, message, timestamp, context, trace }) => {
       const ctx = context ? `\x1b[33m[${context}]\x1b[0m ` : "";
       const traceOutput = trace ? `\n${JSON.stringify(trace, null, 2)}` : "";
