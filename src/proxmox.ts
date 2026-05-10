@@ -1,5 +1,5 @@
-import { env, getProxmoxAuthHeader } from "./env";
-import { logger } from "./logger";
+import { env, getProxmoxAuthHeader } from "./env.js";
+import { logger } from "./logger.js";
 
 const module = "Proxmox";
 

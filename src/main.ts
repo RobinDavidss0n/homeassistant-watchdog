@@ -1,8 +1,8 @@
 import { Browser, BrowserContext, chromium, Page } from "playwright";
-import { env } from "./env";
-import { logger } from "./logger";
-import { restartHaVm } from "./proxmox";
-import { hasActiveJobs } from "./ha-jobs";
+import { env } from "./env.js";
+import { logger } from "./logger.js";
+import { restartHaVm } from "./proxmox.js";
+import { hasActiveJobs } from "./ha-jobs.js";
 import dayjs from "dayjs";
 
 const module = "Main";
