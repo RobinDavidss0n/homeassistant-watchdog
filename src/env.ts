@@ -28,6 +28,16 @@ export const env = {
   REINIT_BROWSER_LOOPS:             null,
 };
 
+
+if(env.NODE_ENV === "development") {
+  env.CHECK_INTERVAL_MS =                5 * 1000;
+  env.UI_LOAD_TIMEOUT_MS =               2 * 1000;
+  env.FAILS_BEFORE_RESTART =             3;
+  env.REINIT_BROWSER_LOOPS_TIME_HOURS =  0.1;
+  env.WAIT_AFTER_JOB_DETECTED_MINUTES =  0.1;
+  env.WAIT_AFTER_RESTART_MINUTES =       0.5;
+}
+
 // Dynamically calculated based on the set REINIT_BROWSER_LOOPS_TIME_HOURS
 env.REINIT_BROWSER_LOOPS = (env.REINIT_BROWSER_LOOPS_TIME_HOURS * 60 * 60 * 1000) / env.CHECK_INTERVAL_MS; 
 

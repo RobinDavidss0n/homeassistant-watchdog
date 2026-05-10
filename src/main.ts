@@ -9,6 +9,8 @@ const module = "Main";
 
 async function run() {
 
+  let activeFails = 0;
+  
   while (true) {
 
     let browser: Browser;
@@ -33,7 +35,6 @@ async function run() {
       page    = await context.newPage();
     
       let loops = 0;
-      let activeFails = 0;
     
       while (env.REINIT_BROWSER_LOOPS > loops) {
     
@@ -59,7 +60,7 @@ async function run() {
           logger.debug(module, "UI health check passed :)");
 
           if(activeFails > 0) {
-            logger.info(module, `Healthy :) Resetting active fail count (was ${activeFails})`);
+            logger.info(module, `Healthy again :) Resetting active fail count (was ${activeFails})`);
             activeFails = 0;
           }
       
