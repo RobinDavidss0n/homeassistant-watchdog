@@ -15,7 +15,8 @@ export const env = {
   CHECK_INTERVAL_MS:         10 * 1000,
   UI_LOAD_TIMEOUT_MS:        2.5 * 1000,
   REINIT_BROWSER_LOOPS_TIME: 12, // In hours
-  REINIT_BROWSER_LOOPS: 0,
+  REINIT_BROWSER_LOOPS:      0,
+  LOG_HA_JOBS_OUTPUT:        false
 };
 
 // Dynamically calculated based on the set REINIT_BROWSER_LOOPS_TIME
