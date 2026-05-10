@@ -7,6 +7,7 @@
     "dev": "docker compose --profile dev up --build --watch --force-recreate --remove-orphans dev"
   },
   "dependencies": {
+    "dayjs": "^1.11.20",
     "playwright": "^1.43.0",
     "undici": "^8.2.0",
     "winston": "^3.13.0"

@@ -12,7 +12,9 @@ export const restartHaVm = async (): Promise<void> => {
       {
         method: "POST",
         headers: {
-          "Authorization": env.PROXMOX_TOKEN
+          "Authorization": env.PROXMOX_TOKEN.startsWith("PVEAPIToken=") 
+            ? env.PROXMOX_TOKEN 
+            : `PVEAPIToken=${env.PROXMOX_TOKEN}`
         }
       }
     );
@@ -21,7 +23,8 @@ export const restartHaVm = async (): Promise<void> => {
       throw new Error(`Proxmox API responded with status: ${response.status}`);
     }
 
-    logger.debug(module, "Restart command sent successfully to Proxmox API");
+    logger.info(module, "Restart command sent successfully to Proxmox API");
+    
   } catch (error) {
     logger.error(module, "Failed to execute VM restart", error);
   }

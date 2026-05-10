@@ -3,6 +3,7 @@ import { env } from "./env";
 import { logger } from "./logger";
 import { restartHaVm } from "./proxmox";
 import { hasActiveJobs } from "./ha-jobs";
+import dayjs from "dayjs";
 
 const module = "Main";
 
@@ -32,48 +33,83 @@ async function run() {
       page    = await context.newPage();
     
       let loops = 0;
+      let activeFails = 0;
     
       while (env.REINIT_BROWSER_LOOPS > loops) {
     
         loops++;
         
         try {
+
+          // throw new Error("Simulated UI failure for testing");
+
           await page.goto(
-            env.HA_URL, 
+            env.HA_URL_HEALTH_DASH, 
             { 
-              waitUntil: "domcontentloaded",
+              waitUntil: "networkidle",
               timeout: env.UI_LOAD_TIMEOUT_MS 
             }
           );
           
-          // Validates bypass of initial loading screen by verifying core app component presence
           await page.waitForSelector(
-            "home-assistant",
+            `text="${env.HA_HEALTH_DASH_TEXT}"`,
             { timeout: env.UI_LOAD_TIMEOUT_MS }
           );
           
-          logger.info(module, "UI health check passed, core component loaded");
+          logger.debug(module, "UI health check passed :)");
+
+          if(activeFails > 0) {
+            logger.info(module, `Healthy :) Resetting active fail count (was ${activeFails})`);
+            activeFails = 0;
+          }
       
         } catch (error) {
-          logger.error(module, "UI health check failed, loading screen hang detected", error);
-      
+
+          logger.error(module, `UI health check failed :(`, error);
+          
           const isWorking = await hasActiveJobs();
       
-          // if (isWorking) {
-          //   logger.info(module, "Supervisor has active jobs. Deferring restart.");
+          if (isWorking) {
+            logger.info(module, "But supervisor has active jobs :) Deferring restart.");
 
-          //   await cleanup(false);
-          //   context = await browser.newContext({ ignoreHTTPSErrors: true });
-          //   page    = await context.newPage();
+            await cleanup(false);
+            context = await browser.newContext({ ignoreHTTPSErrors: true });
+            page    = await context.newPage();
 
-          // } else {
-          //   await restartHaVm();
-          //   break; // Exit loop after triggering restart, reinitializing browser
-          // }
+            logger.info(module, `Waiting ${env.WAIT_AFTER_JOB_DETECTED_MINUTES} minutes before rechecking...`);
+            await new Promise(resolve => setTimeout(resolve, env.WAIT_AFTER_JOB_DETECTED_MINUTES * 60 * 1000));
+
+          } else {
+            
+            activeFails++;
+
+            if(env.FAILS_BEFORE_RESTART >= activeFails) {
+            
+              logger.info(module, `UI health check failed, no active jobs, but fail count (${activeFails}) is below threshold (${env.FAILS_BEFORE_RESTART}). Deferring restart.`);
+            
+            } else {
+
+              logger.info(module, "No active jobs found. Restarting HA VM.");
+  
+              const timestamp = `${dayjs().format("YYYY-MM-DD _ HH-mm-ss-SSS")}`;
+              const path = `${env.FAIL_SCREENSHOT_PATH}/${timestamp}.png`;
+  
+              await page.screenshot({ path, fullPage: true });
+  
+              logger.info(module, `Saved failure screenshot to ${path}`);
+              await restartHaVm();
+  
+              logger.info(module, `Waiting ${env.WAIT_AFTER_RESTART_MINUTES} minutes for VM to restart before continuing...`);
+              await new Promise(resolve => setTimeout(resolve, env.WAIT_AFTER_RESTART_MINUTES * 60 * 1000));
+  
+              break; // Exit loop after triggering restart, reinitializing browser
+            }
+
+          }
           
         }
 
-        if(env.NODE_ENV === "development")
+        if(env.DEMO_RUN)
           break;
     
         await new Promise(resolve => setTimeout(resolve, env.CHECK_INTERVAL_MS));
@@ -87,8 +123,10 @@ async function run() {
       await cleanup(true);
     }
 
-    if(env.NODE_ENV === "development") {
+    if(env.DEMO_RUN) {
       logger.debug(module, "Demo run done")
+      // Wait indefinitely to allow inspection of container
+      await new Promise(resolve => setTimeout(resolve, 999999999));
       break;
     }
   }

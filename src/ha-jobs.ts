@@ -68,20 +68,57 @@ const executeGuestCommand = async (command: string[]): Promise<string> => {
 export const hasActiveJobs = async (): Promise<boolean> => {
 
   try {
-    logger.debug(module, "Checking Supervisor for active jobs via QEMU guest agent");
+    logger.info(module, "Checking Supervisor for active jobs via QEMU guest agent");
     
     const output = await executeGuestCommand(["ha", "jobs", "info"]);
     
     if (!output) {
-      logger.info(module, "Guest agent returned empty output. Assuming active jobs to prevent unsafe restart.");
+      logger.error(module, "Guest agent returned empty output. Assuming active jobs to prevent unsafe restart.");
       return true;
     }
 
-    const matches = output.match(/^\s*done:\s*false\s*$/gm);
-    const activeJobCount = matches ? matches.length : 0;
+    const lines = output.split("\n");
+    const activeJobs: Record<string, string>[] = [];
 
-    logger.debug(module, `Supervisor reported ${activeJobCount} active job(s)`);
-    return activeJobCount > 0;
+    for (let i = 0; i < lines.length; i++) {
+      
+      if (lines[i].includes("done: false")) {
+
+        const indentMatch = lines[i].match(/^\s*/);
+        const indent = indentMatch ? indentMatch[0].length : 0;
+        const jobData: Record<string, string> = {};
+
+        const extract = (line: string) => {
+          const match = line.match(new RegExp(`^ {${indent}}([a-z_]+):\\s*(.*)$`));
+          if (match) jobData[match[1]] = match[2].replace(/^"|"$/g, "");
+        };
+
+        // Scan backwards for keys belonging to this job block
+        for (let j = i; j >= 0; j--) {
+          const currIndent = lines[j].match(/^\s*/)?.[0].length || 0;
+          if (currIndent < indent && lines[j].trim() !== "") break;
+          if (currIndent === indent) extract(lines[j]);
+        }
+
+        // Scan forwards for keys belonging to this job block
+        for (let j = i + 1; j < lines.length; j++) {
+          const currIndent = lines[j].match(/^\s*/)?.[0].length || 0;
+          if (currIndent < indent && lines[j].trim() !== "") break;
+          if (currIndent === indent) extract(lines[j]);
+        }
+
+        activeJobs.push(jobData);
+      }
+    }
+
+    if (activeJobs.length > 0) {
+      logger.info(module, `Supervisor reported ${activeJobs.length} active job(s)`);
+      console.log("Active jobs:", activeJobs);
+    } else {
+      logger.info(module, "Supervisor reported 0 active jobs");
+    }
+
+    return activeJobs.length > 0;
 
   } catch (error) {
 
