@@ -12,7 +12,7 @@ export const env = {
   HA_VM_ID:                         "100",
   HA_HEALTH_DASH_TEXT:              "I'm healthy :)",
   FAIL_SCREENSHOT_PATH:             "/ha-watchdog",
-  CHECK_INTERVAL_MS:                60 * 1000,
+  CHECK_INTERVAL_MS:                30 * 1000,
   UI_LOAD_TIMEOUT_MS:               5 * 1000,
   FAILS_BEFORE_RESTART:             3,
   REINIT_BROWSER_LOOPS_TIME_HOURS:  12,
