@@ -15,11 +15,11 @@ const winstonLogger = createLogger({
 });
 
 export const logger = {
-  info: (msg: string, context?: string) => winstonLogger.info(msg, { context }),
-  error: (msg: string, trace?: unknown, context?: string) => winstonLogger.error(msg, { trace, context }),
-  debug: (msgFn: () => string, context?: string) => {
+  info: (module: string, msg: string, context?: string) => winstonLogger.info(`[${module}] ${msg}`, { context }),
+  error: (module: string, msg: string, trace?: unknown, context?: string) => winstonLogger.error(`[${module}] ${msg}`, { trace, context }),
+  debug: (module: string, msg: string, context?: string) => {
     if (winstonLogger.isLevelEnabled("debug")) {
-      winstonLogger.debug(msgFn(), { context });
+      winstonLogger.debug(`[${module}] ${msg}`, { context });
     }
   }
 };

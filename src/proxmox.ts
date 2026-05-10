@@ -1,8 +1,10 @@
 import { env } from "./env";
 import { logger } from "./logger";
 
+const module = "Proxmox";
+
 export const restartHaVm = async (): Promise<void> => {
-  logger.info(`Triggering restart for VM ${env.HA_VM_ID} on node ${env.PROXMOX_NODE}`);
+  logger.info(module, `Triggering restart for VM ${env.HA_VM_ID} on node ${env.PROXMOX_NODE}`);
 
   try {
     const response = await fetch(
@@ -19,8 +21,8 @@ export const restartHaVm = async (): Promise<void> => {
       throw new Error(`Proxmox API responded with status: ${response.status}`);
     }
 
-    logger.debug(() => "Restart command sent successfully to Proxmox API");
+    logger.debug(module, "Restart command sent successfully to Proxmox API");
   } catch (error) {
-    logger.error("Failed to execute VM restart", error);
+    logger.error(module, "Failed to execute VM restart", error);
   }
 };

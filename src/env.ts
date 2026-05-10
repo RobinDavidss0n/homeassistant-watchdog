@@ -1,4 +1,9 @@
+import { setGlobalDispatcher, Agent } from "undici";
+
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
+// Force Node native fetch to bypass TLS validation
+setGlobalDispatcher(new Agent({ connect: { rejectUnauthorized: false } }));
 
 export const env = {
   NODE_ENV:                  process.env.NODE_ENV as "production" | "development",

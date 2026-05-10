@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "playwright": "^1.43.0",
+    "undici": "^8.2.0",
     "winston": "^3.13.0"
   },
   "devDependencies": {
