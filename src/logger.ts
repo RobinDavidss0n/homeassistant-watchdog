@@ -1,7 +1,8 @@
 import { createLogger, format, transports } from "winston";
+import { env } from "./env.js";
 
 const winstonLogger = createLogger({
-  level: "debug",
+  level: env.NODE_ENV === "production" ? "info" : "debug",
   format: format.combine(
     format.colorize(),
     format.timestamp({ format: "hh:mm:ss:SSS" }),
