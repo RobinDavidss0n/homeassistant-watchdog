@@ -1,7 +1,5 @@
 import { setGlobalDispatcher, Agent } from "undici";
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
 // Force Node native fetch to bypass TLS validation
 setGlobalDispatcher(new Agent({ connect: { rejectUnauthorized: false } }));
 
@@ -13,18 +11,27 @@ export const env = {
   PROXMOX_NODE:                     "proxmox",
   HA_VM_ID:                         "100",
   HA_HEALTH_DASH_TEXT:              "I'm healthy :)",
-  CHECK_INTERVAL_MS:                10 * 1000,
-  UI_LOAD_TIMEOUT_MS:               2.5 * 1000,
-  FAILS_BEFORE_RESTART:             3,
-  REINIT_BROWSER_LOOPS_TIME:        6, // In hours
-  REINIT_BROWSER_LOOPS:             0,
   FAIL_SCREENSHOT_PATH:             "/ha-watchdog",
-  WAIT_AFTER_JOB_DETECTED_MINUTES:  1,
+  CHECK_INTERVAL_MS:                60 * 1000,
+  UI_LOAD_TIMEOUT_MS:               5 * 1000,
+  FAILS_BEFORE_RESTART:             3,
+  REINIT_BROWSER_LOOPS_TIME_HOURS:  12,
+  WAIT_AFTER_JOB_DETECTED_MINUTES:  2,
   WAIT_AFTER_RESTART_MINUTES:       5,
+
+  // Debugging options
   LOG_HA_JOBS_OUTPUT:               false,
   /** Only run one time then stops */
-  DEMO_RUN:                         false
+  DEMO_RUN:                         false,
+
+  // Dynamically auto set
+  REINIT_BROWSER_LOOPS:             null,
 };
 
-// Dynamically calculated based on the set REINIT_BROWSER_LOOPS_TIME
-env.REINIT_BROWSER_LOOPS = (env.REINIT_BROWSER_LOOPS_TIME * 60 * 60 * 1000) / env.CHECK_INTERVAL_MS; 
+// Dynamically calculated based on the set REINIT_BROWSER_LOOPS_TIME_HOURS
+env.REINIT_BROWSER_LOOPS = (env.REINIT_BROWSER_LOOPS_TIME_HOURS * 60 * 60 * 1000) / env.CHECK_INTERVAL_MS; 
+
+export const getProxmoxAuthHeader = () => 
+  env.PROXMOX_TOKEN.startsWith("PVEAPIToken=") 
+    ? env.PROXMOX_TOKEN 
+    : `PVEAPIToken=${env.PROXMOX_TOKEN}`;

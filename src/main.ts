@@ -83,18 +83,21 @@ async function run() {
             
             activeFails++;
 
-            if(env.FAILS_BEFORE_RESTART >= activeFails) {
+            if(env.FAILS_BEFORE_RESTART > activeFails) {
             
               logger.info(module, `UI health check failed, no active jobs, but fail count (${activeFails}) is below threshold (${env.FAILS_BEFORE_RESTART}). Deferring restart.`);
             
             } else {
 
+              logger.info(module, `Active fails (${activeFails}) threshold reached (${env.FAILS_BEFORE_RESTART}).`);
               logger.info(module, "No active jobs found. Restarting HA VM.");
   
               const timestamp = `${dayjs().format("YYYY-MM-DD _ HH-mm-ss-SSS")}`;
               const path = `${env.FAIL_SCREENSHOT_PATH}/${timestamp}.png`;
   
-              await page.screenshot({ path, fullPage: true });
+              await page.screenshot({ path, fullPage: true }).catch(e => {
+                logger.error(module, "Failed to capture screenshot of failure", e)
+              });
   
               logger.info(module, `Saved failure screenshot to ${path}`);
               await restartHaVm();

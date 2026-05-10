@@ -1,4 +1,4 @@
-import { env } from "./env";
+import { env, getProxmoxAuthHeader } from "./env";
 import { logger } from "./logger";
 
 const module = "HA Jobs";
@@ -10,9 +10,7 @@ const executeGuestCommand = async (command: string[]): Promise<string> => {
     {
       method: "POST",
       headers: {
-        "Authorization": env.PROXMOX_TOKEN.startsWith("PVEAPIToken=") 
-          ? env.PROXMOX_TOKEN 
-          : `PVEAPIToken=${env.PROXMOX_TOKEN}`,
+        "Authorization": getProxmoxAuthHeader(),
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ command })
@@ -34,9 +32,7 @@ const executeGuestCommand = async (command: string[]): Promise<string> => {
       `${env.PROXMOX_HOST}/api2/json/nodes/${env.PROXMOX_NODE}/qemu/${env.HA_VM_ID}/agent/exec-status?pid=${pid}`,
       { 
         headers: { 
-          "Authorization": env.PROXMOX_TOKEN.startsWith("PVEAPIToken=") 
-            ? env.PROXMOX_TOKEN 
-            : `PVEAPIToken=${env.PROXMOX_TOKEN}` 
+          "Authorization": getProxmoxAuthHeader()
         }
       }
     );

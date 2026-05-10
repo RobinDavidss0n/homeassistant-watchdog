@@ -1,4 +1,4 @@
-import { env } from "./env";
+import { env, getProxmoxAuthHeader } from "./env";
 import { logger } from "./logger";
 
 const module = "Proxmox";
@@ -12,9 +12,7 @@ export const restartHaVm = async (): Promise<void> => {
       {
         method: "POST",
         headers: {
-          "Authorization": env.PROXMOX_TOKEN.startsWith("PVEAPIToken=") 
-            ? env.PROXMOX_TOKEN 
-            : `PVEAPIToken=${env.PROXMOX_TOKEN}`
+          "Authorization": getProxmoxAuthHeader()
         }
       }
     );
