@@ -4,12 +4,23 @@ import { logger } from "./logger.js";
 import { restartHaVm } from "./proxmox.js";
 import { hasActiveJobs } from "./ha-jobs.js";
 import dayjs from "dayjs";
+import { sendHaNotification } from "./ha-notifications.js";
 
 const module = "Main";
 
 async function run() {
 
   let activeFails = 0;
+  let isUnhealthy = false;
+  let justRestarted = false;
+
+  const resetActiveFails = () => {
+    if(activeFails > 0) {
+       
+      logger.info(module, `Resetting active fail count (was ${activeFails})`);
+      activeFails = 0;
+    }
+  }
   
   while (true) {
 
@@ -28,7 +39,7 @@ async function run() {
   
     try {
       
-      logger.debug(module, "Initializing Playwright for UI health check");
+      logger.debug(module, "(Re)initializing Playwright");      
       
       browser = await chromium.launch({ headless: true });
       context = await browser.newContext({ ignoreHTTPSErrors: true });
@@ -45,7 +56,7 @@ async function run() {
           // throw new Error("Simulated UI failure for testing");
 
           await page.goto(
-            env.HA_URL_HEALTH_DASH, 
+            `${env.HA_BASE_URL}/${env.HA_HEALTH_DASH_URL_PATH}`, 
             { 
               waitUntil: "networkidle",
               timeout: env.UI_LOAD_TIMEOUT_MS 
@@ -59,9 +70,17 @@ async function run() {
           
           logger.debug(module, "UI health check passed :)");
 
-          if(activeFails > 0) {
-            logger.info(module, `Healthy again :) Resetting active fail count (was ${activeFails})`);
-            activeFails = 0;
+          if(isUnhealthy) {
+
+            logger.info(module, `Healthy again :)`);
+            
+            resetActiveFails();
+            isUnhealthy = false;
+          }
+
+          if (justRestarted) {
+            await sendHaNotification("HA Watchdog: Home Assistant was restarted and has recovered successfully :)");
+            justRestarted = false;
           }
       
         } catch (error) {
@@ -79,9 +98,11 @@ async function run() {
 
             logger.info(module, `Waiting ${env.WAIT_AFTER_JOB_DETECTED_MINUTES} minutes before rechecking...`);
             await new Promise(resolve => setTimeout(resolve, env.WAIT_AFTER_JOB_DETECTED_MINUTES * 60 * 1000));
+            isUnhealthy = true;
 
           } else {
             
+            isUnhealthy = true;
             activeFails++;
 
             if(env.FAILS_BEFORE_RESTART > activeFails) {
@@ -102,6 +123,9 @@ async function run() {
   
               logger.info(module, `Saved failure screenshot to ${path}`);
               await restartHaVm();
+
+              resetActiveFails();
+              justRestarted = true;
   
               logger.info(module, `Waiting ${env.WAIT_AFTER_RESTART_MINUTES} minutes for VM to restart before continuing...`);
               await new Promise(resolve => setTimeout(resolve, env.WAIT_AFTER_RESTART_MINUTES * 60 * 1000));
