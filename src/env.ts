@@ -7,7 +7,7 @@ export const env = {
   NODE_ENV:                         process.env.NODE_ENV as "production" | "development",
   PROXMOX_TOKEN:                    process.env.PROXMOX_TOKEN,
   PROXMOX_HOST:                     process.env.PROXMOX_HOST              ?? "https://192.168.1.2:8006",
-  PROXMOX_NODE:                     process.env.PROXMOX_NODE              ?? "proxmox",
+  PROXMOX_NODE:                     process.env.PROXMOX_NODE              ?? "pve",
   HA_TOKEN:                         process.env.HA_TOKEN,
   HA_BASE_URL:                      process.env.HA_BASE_URL               ?? "http://192.168.1.10:8123",
   HA_NOTIFY_SERVICE:                process.env.HA_NOTIFY_SERVICE         ?? "mobile_app_robins_oneplus_13",
