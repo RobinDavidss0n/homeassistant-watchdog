@@ -6,10 +6,10 @@ setGlobalDispatcher(new Agent({ connect: { rejectUnauthorized: false } }));
 export const env = {
   NODE_ENV:                         process.env.NODE_ENV as "production" | "development",
   PROXMOX_TOKEN:                    process.env.PROXMOX_TOKEN,
-  PROXMOX_HOST:                     process.env.PROXMOX_HOST              ?? "https://192.168.50.244:8006",
+  PROXMOX_HOST:                     process.env.PROXMOX_HOST              ?? "https://192.168.1.2:8006",
   PROXMOX_NODE:                     process.env.PROXMOX_NODE              ?? "proxmox",
   HA_TOKEN:                         process.env.HA_TOKEN,
-  HA_BASE_URL:                      process.env.HA_BASE_URL               ?? "http://192.168.50.135:8123",
+  HA_BASE_URL:                      process.env.HA_BASE_URL               ?? "http://192.168.1.10:8123",
   HA_NOTIFY_SERVICE:                process.env.HA_NOTIFY_SERVICE         ?? "mobile_app_robins_oneplus_13",
   HA_HEALTH_DASH_URL_PATH:          process.env.HA_HEALTH_DASH_URL_PATH   ?? "health-check/0",
   HA_VM_ID:                         process.env.HA_VM_ID                  ?? "100",
